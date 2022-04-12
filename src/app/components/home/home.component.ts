@@ -13,6 +13,11 @@ declare var Microgear: any;
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+  public online: "Online" | "Offline" = "Offline"
+  public temp: Number = 0
+  public hum: Number = 0
+  public label: any = []
+  public water: any = []
   public lineChartType: ChartType = 'line';
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
@@ -112,13 +117,27 @@ export class HomeComponent implements OnInit {
 
     this.microgear.on("present", (event: any) => {
       console.log(event);
-
+      if (event.type == "online") {
+        this.online = "Online"
+      } else {
+        this.online = "Offline"
+        this.temp = 0
+        this.hum = 0
+      }
     });
 
-    this.microgear.on("message", (topic: string, msg: string) => {
-      console.log(topic);
-      console.log(msg);
-    });
+    this.microgear.on("message", (topic: any, msg: any) => {
+      // console.log(topic, msg);
+      // console.log(msg);
+      if (topic == "/RainMeter/mqtt/temp") {
+        this.temp = msg
+      }
+      if (topic == "/RainMeter/mqtt/hum") {
+        this.hum = msg
+      }
+      // console.log(this.temp);
+    }
+    );
 
     this.microgear.on("absent", (event: any) => {
       console.log(event);
@@ -126,7 +145,7 @@ export class HomeComponent implements OnInit {
 
     // if (this.microgear.onConnect()) {
     //   this.microgear.onMicrogear().on("absent", (event: any) => {
-    //     console.log(event);
+    //     console.log(event);x
     //   });
     // }
   }
@@ -160,37 +179,41 @@ export class HomeComponent implements OnInit {
         )
       )
     ).subscribe(data => {
+      console.log(data);
       this.rainLog = data;
       // console.log(this.rainLog);
-
       // let keys = [...this.rainLog];
       // console.log(keys);
-
+      this.label = []
+      this.water = []
       for (var i = 0; i < this.rainLog.length; i++) {
         // console.log(this.rainLog[i]);
         // console.log(Object.values(this.rainLog[i]));
-        let xd = Object.values(this.rainLog[i])
+        let rainData = Object.values(this.rainLog[i])
         // console.log(xd);
-        xd.splice(0, 1);
-
-
-
-        xd.sort((a, b) => a.time.localeCompare(b.time));
-        console.log(xd);
-
-        const label = xd.map(item => item.time.toString());
-        console.log(label);
-        const water = xd.map(item => item.water);
-        console.log(water);
-
-        let tmp = [1, 2, 3, 4, 56, 55, 40];
-
-        this.lineChartData.labels = [...label];
-        this.lineChartData.datasets[0].data = [...water];
+        rainData.splice(0, 1);
+        // Asc
+        rainData.sort((a, b) => a.time.localeCompare(b.time));
+        // console.log(rainData);
+        const label = rainData.map(item => item.time.toString());
+        // console.log(label);
+        const water = rainData.map(item => item.water);
+        // console.log(water);
+        // let tmp = [1, 2, 3, 4, 56, 55, 40];
+        label.forEach(element => {
+          this.label.push(element);
+        });
+        water.forEach(element => {
+          this.water.push(element);
+        });
+        // this.lineChartData.labels = [...label];
+        // this.lineChartData.datasets[0].data = [...water];
         // console.log(this.lineChartData.datasets[0].data);
-
-        this.chart?.update();
+        // this.chart?.update();
       }
+      this.lineChartData.labels = [...this.label];
+      this.lineChartData.datasets[0].data = [...this.water];
+      this.chart?.update();
 
       // var result = [];
       // for (var i = 0; i < this.rainLog.length; i++) {
@@ -232,6 +255,7 @@ export class HomeComponent implements OnInit {
   }
 
   // Asc
+  // xd.sort((a, b) => a.time.localeCompare(b.time));a
   // xd.sort(function (a, b) {
   //   return a.time.localeCompare(b.time);
   // });
