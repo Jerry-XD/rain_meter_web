@@ -117,9 +117,9 @@ export class HomeComponent implements OnInit {
 
     this.microgear.on("present", (event: any) => {
       console.log(event);
-      if (event.type == "online") {
+      if (event.type == "online" && event.alias == "ESP8266") {
         this.online = "Online"
-      } else {
+      } else if (event.type == "offline" && event.alias == "ESP8266") {
         this.online = "Offline"
         this.temp = 0
         this.hum = 0
