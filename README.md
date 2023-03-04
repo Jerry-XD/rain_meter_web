@@ -15,10 +15,13 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
+node-v12.20.2-x64
+
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
 ng build --prod --build-optimizer --base-href /student/preya.ha/project/ --deploy-url /student/preya.ha/project/
-
+ng build --prod --build-optimizer --base-href /student/supachai.kn/project/ --deploy-url /student/supachai.kn/project/
+ng build --prod --build-optimizer --base-href /student/supachai.kn/web/ --deploy-url /student/supachai.kn/web/
 
 ## Running unit tests
 
