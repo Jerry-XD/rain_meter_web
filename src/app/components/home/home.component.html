@@ -2,10 +2,10 @@
   <div class="text-temp">
     <p>อุณหภูมิ : {{this.temp}} °C</p>
     <p>ความชื้น : {{this.hum}} %</p>
-    <p>สถานะเครื่อง :
+    <!-- <p>สถานะเครื่อง :
       <a style="color:lime" *ngIf="this.online == 'Online'">{{this.online}}</a>
       <a style="color:red" *ngIf="this.online == 'Offline'">{{this.online}}</a>
-    </p>
+    </p> -->
   </div>
   <div style="width: 600px; height: 300px; display: flex; justify-content: center;">
     <canvas baseChart width="400" height="400" [data]="lineChartData" [options]="lineChartOptions"

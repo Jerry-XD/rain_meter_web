@@ -10,3 +10,8 @@ export class RainLog {
   time?: string;
   water?: string;
 }
+
+export class Temp {
+  temp?: string;
+  hum?: string;
+}

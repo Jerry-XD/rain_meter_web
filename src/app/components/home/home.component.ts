@@ -5,7 +5,9 @@ import { RainLog } from './../../models/tutorial.model';
 import { ChartConfiguration, ChartEvent, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { map } from 'rxjs/operators';
-declare var Microgear: any;
+// declare var Microgear: any;
+import { Pipe, PipeTransform } from '@angular/core';
+
 
 @Component({
   selector: 'app-home',
@@ -33,7 +35,7 @@ export class HomeComponent implements OnInit {
         fill: 'origin',
       },
     ],
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July']
+    // labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July']
   };
 
   // barChartOptions: any = {
@@ -91,14 +93,14 @@ export class HomeComponent implements OnInit {
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
-  private microgear = Microgear.create({
-    key: 'Sr5FvJyq6aIYZxA',
-    secret: 'XaSO8HZuRTmjhgj3TfmXJmfMf',
-    alias: 'RainMeterWeb'
-    // key: 'RwVp3TRt2uj4KnG',
-    // secret: 'jFMXgaJk1jPoltXpFNPV6lrrG',
-    // alias: 'WebProject'
-  });
+  // private microgear = Microgear.create({
+  //   key: 'Sr5FvJyq6aIYZxA',
+  //   secret: 'XaSO8HZuRTmjhgj3TfmXJmfMf',
+  //   alias: 'RainMeterWeb'
+  //   // key: 'RwVp3TRt2uj4KnG',
+  //   // secret: 'jFMXgaJk1jPoltXpFNPV6lrrG',
+  //   // alias: 'WebProject'
+  // });
 
   rainLog?: RainLog[];
   tutorials?: Tutorial[];
@@ -108,40 +110,40 @@ export class HomeComponent implements OnInit {
   constructor(private tutorialService: TutorialService) {
     this.chart?.update();
 
-    this.microgear.connect('RainMeter');
-    this.microgear.subscribe('/mqtt/#');
+    // this.microgear.connect('RainMeter');
+    // this.microgear.subscribe('/mqtt/#');
 
-    this.microgear.on('connected', function () {
-      console.log("NETPIE Connected");
-    });
+    // this.microgear.on('connected', function () {
+    //   console.log("NETPIE Connected");
+    // });
 
-    this.microgear.on("present", (event: any) => {
-      console.log(event);
-      if (event.type == "online" && event.alias == "ESP8266") {
-        this.online = "Online"
-      } else if (event.type == "offline" && event.alias == "ESP8266") {
-        this.online = "Offline"
-        this.temp = 0
-        this.hum = 0
-      }
-    });
+    // this.microgear.on("present", (event: any) => {
+    //   console.log(event);
+    //   if (event.type == "online" && event.alias == "ESP8266") {
+    //     this.online = "Online"
+    //   } else if (event.type == "offline" && event.alias == "ESP8266") {
+    //     this.online = "Offline"
+    //     this.temp = 0
+    //     this.hum = 0
+    //   }
+    // });
 
-    this.microgear.on("message", (topic: any, msg: any) => {
-      // console.log(topic, msg);
-      // console.log(msg);
-      if (topic == "/RainMeter/mqtt/temp") {
-        this.temp = msg
-      }
-      if (topic == "/RainMeter/mqtt/hum") {
-        this.hum = msg
-      }
-      // console.log(this.temp);
-    }
-    );
+    // this.microgear.on("message", (topic: any, msg: any) => {
+    //   // console.log(topic, msg);
+    //   // console.log(msg);
+    //   if (topic == "/RainMeter/mqtt/temp") {
+    //     this.temp = msg
+    //   }
+    //   if (topic == "/RainMeter/mqtt/hum") {
+    //     this.hum = msg
+    //   }
+    //   // console.log(this.temp);
+    // }
+    // );
 
-    this.microgear.on("absent", (event: any) => {
-      console.log(event);
-    });
+    // this.microgear.on("absent", (event: any) => {
+    //   console.log(event);
+    // });
 
     // if (this.microgear.onConnect()) {
     //   this.microgear.onMicrogear().on("absent", (event: any) => {
@@ -171,6 +173,15 @@ export class HomeComponent implements OnInit {
     //   this.tutorials = data;
     //   console.log(this.tutorials);
     // });
+
+    this.tutorialService.getTemp().valueChanges().subscribe(data => {
+      console.log(data);
+      // console.log(data?.hum);
+      // console.log(data?.temp);
+      this.hum = Number(data?.hum);
+      this.temp = Number(data?.temp);
+    });
+
 
     this.tutorialService.getAllRainLog().snapshotChanges().pipe(
       map(changes =>
@@ -244,15 +255,15 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  public onConnect() {
-    return this.microgear.on('connected', function () {
-      console.log("NETPIE Connected");
-    });
-  }
+  // public onConnect() {
+  //   return this.microgear.on('connected', function () {
+  //     console.log("NETPIE Connected");
+  //   });
+  // }
 
-  public onMicrogear() {
-    return this.microgear;
-  }
+  // public onMicrogear() {
+  //   return this.microgear;
+  // }
 
   // Asc
   // xd.sort((a, b) => a.time.localeCompare(b.time));a
