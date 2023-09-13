@@ -6,20 +6,41 @@ import { ChartConfiguration, ChartEvent, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { map } from 'rxjs/operators';
 // declare var Microgear: any;
-import { Pipe, PipeTransform } from '@angular/core';
+import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
+import * as moment from 'moment';
 
+interface Time {
+  value: string;
+  viewValue: string;
+}
+
+interface Water {
+  value: string;
+  viewValue: string;
+}
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
-  public online: "Online" | "Offline" = "Offline"
+  // public online: "Online" | "Offline" = "Offline"
+  selectedTimeValue: string;
+  selectedWaterValue: string;
+  times: Time[] = [
+    { value: '10', viewValue: '10 นาที' },
+    { value: '15', viewValue: '15 นาที' },
+  ];
+  waters: Water[] = [
+    { value: '60', viewValue: '60 มิลลิเมตร' },
+    { value: '90', viewValue: '90 มิลลิเมตร' },
+  ];
   public temp: Number = 0
   public hum: Number = 0
-  public label: any = []
-  public water: any = []
+  public label: any[] = []
+  public water: any[] = []
+  public x: any = []
   public lineChartType: ChartType = 'line';
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
@@ -35,23 +56,7 @@ export class HomeComponent implements OnInit {
         fill: 'origin',
       },
     ],
-    // labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July']
   };
-
-  // barChartOptions: any = {
-  //   responsive: true,
-  //   scales: { //you're missing this
-  //     yAxes: [{
-  //       scaleLabel: {
-  //         display: true,
-  //         labelString: 'Frequency Rate'
-  //       },
-  //       ticks: { // and this
-
-  //       }
-  //     }]
-  //   }//END scales
-  // };
 
   public lineChartOptions: ChartConfiguration['options'] = {
     elements: {
@@ -60,10 +65,8 @@ export class HomeComponent implements OnInit {
       }
     },
     scales: {
-
       // We use this empty structure as a placeholder for dynamic theming.
       x: {
-
       },
       'y-axis-0':
       {
@@ -92,65 +95,74 @@ export class HomeComponent implements OnInit {
   };
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-
-  // private microgear = Microgear.create({
-  //   key: 'Sr5FvJyq6aIYZxA',
-  //   secret: 'XaSO8HZuRTmjhgj3TfmXJmfMf',
-  //   alias: 'RainMeterWeb'
-  //   // key: 'RwVp3TRt2uj4KnG',
-  //   // secret: 'jFMXgaJk1jPoltXpFNPV6lrrG',
-  //   // alias: 'WebProject'
-  // });
-
+  // xx?: RainLog[];
   rainLog?: RainLog[];
   tutorials?: Tutorial[];
   currentTutorial?: Tutorial;
   currentIndex = -1;
-
   constructor(private tutorialService: TutorialService) {
     this.chart?.update();
-
-    // this.microgear.connect('RainMeter');
-    // this.microgear.subscribe('/mqtt/#');
-
-    // this.microgear.on('connected', function () {
-    //   console.log("NETPIE Connected");
-    // });
-
-    // this.microgear.on("present", (event: any) => {
-    //   console.log(event);
-    //   if (event.type == "online" && event.alias == "ESP8266") {
-    //     this.online = "Online"
-    //   } else if (event.type == "offline" && event.alias == "ESP8266") {
-    //     this.online = "Offline"
-    //     this.temp = 0
-    //     this.hum = 0
-    //   }
-    // });
-
-    // this.microgear.on("message", (topic: any, msg: any) => {
-    //   // console.log(topic, msg);
-    //   // console.log(msg);
-    //   if (topic == "/RainMeter/mqtt/temp") {
-    //     this.temp = msg
-    //   }
-    //   if (topic == "/RainMeter/mqtt/hum") {
-    //     this.hum = msg
-    //   }
-    //   // console.log(this.temp);
-    // }
-    // );
-
-    // this.microgear.on("absent", (event: any) => {
-    //   console.log(event);
-    // });
-
-    // if (this.microgear.onConnect()) {
-    //   this.microgear.onMicrogear().on("absent", (event: any) => {
-    //     console.log(event);x
-    //   });
-    // }
   }
+
+  events: string[] = [];
+  selected: Date | null;
+
+  updateSetting(): void {
+    this.tutorialService.updateSettingTime(this.selectedTimeValue)
+      .then(() => console.log("update time success"))
+      .catch(err => console.log(err));
+
+
+    this.tutorialService.updateSettingWater(this.selectedWaterValue)
+      .then(() => console.log("update water success"))
+      .catch(err => console.log(err));
+  }
+
+  addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
+    // this.events.push(`${type}: ${event.value}`);
+    // console.log("7",moment(this.selected).format('DD-MM-YYYY'));
+    this.retrieveRainLogWithDate(moment(this.selected).format('DD-MM-YYYY'));
+  }
+
+  retrieveRainLogWithDate(date: string): void {
+    console.log("date :", date);
+    this.tutorialService.getAllRainLog().snapshotChanges().pipe(
+      map(changes =>
+        changes.map(c =>
+          ({ key: c.payload.key, ...c.payload.val() })
+        )
+      )
+    ).subscribe(data => {
+      // console.log(data);
+      this.rainLog = data;
+      this.label = []
+      this.water = []
+      for (var i = 0; i < this.rainLog.length; i++) {
+        let rainData = Object.values(this.rainLog[i])
+        console.log(rainData[0], date, (rainData[0] += '') == date);
+        if ((rainData[0] += '') == date) {
+          rainData.splice(0, 1);
+          // Asc
+          rainData.sort((a, b) => a.time.localeCompare(b.time));
+          const label = rainData.map(item => item.time.toString());
+          const water = rainData.map(item => item.water);
+          label.forEach(element => {
+            this.label.push(element);
+          });
+          water.forEach(element => {
+            this.water.push(element);
+          });
+        }
+        this.lineChartData.labels = [...this.label];
+        this.lineChartData.datasets[0].data = [...this.water];
+        this.chart?.update();
+      }
+    });
+  }
+
+  // clickDatePicker(): void {
+  //  console.log("XDXDXDXDXD");
+  // }
 
   ngOnInit(): void {
     this.retrieveTutorials();
@@ -163,25 +175,24 @@ export class HomeComponent implements OnInit {
   }
 
   retrieveTutorials(): void {
-    // this.tutorialService.getAll().snapshotChanges().pipe(
-    //   map(changes =>
-    //     changes.map(c =>
-    //       ({ key: c.payload.key, ...c.payload.val() })
-    //     )
-    //   )
-    // ).subscribe(data => {
-    //   this.tutorials = data;
-    //   console.log(this.tutorials);
-    // });
+    this.tutorialService.getSettingTime().valueChanges().subscribe(data => {
+      console.log(data);
+      this.selectedTimeValue = String(data);
+    });
+
+    this.tutorialService.getSettingWater().valueChanges().subscribe(data => {
+      console.log(data);
+      this.selectedWaterValue = String(data);
+    });
+
 
     this.tutorialService.getTemp().valueChanges().subscribe(data => {
-      console.log(data);
+      // console.log(data);
       // console.log(data?.hum);
       // console.log(data?.temp);
       this.hum = Number(data?.hum);
       this.temp = Number(data?.temp);
     });
-
 
     this.tutorialService.getAllRainLog().snapshotChanges().pipe(
       map(changes =>
@@ -190,7 +201,7 @@ export class HomeComponent implements OnInit {
         )
       )
     ).subscribe(data => {
-      console.log(data);
+      console.log("data", data);
       this.rainLog = data;
       // console.log(this.rainLog);
       // let keys = [...this.rainLog];
@@ -198,14 +209,12 @@ export class HomeComponent implements OnInit {
       this.label = []
       this.water = []
       for (var i = 0; i < this.rainLog.length; i++) {
-        // console.log(this.rainLog[i]);
         // console.log(Object.values(this.rainLog[i]));
         let rainData = Object.values(this.rainLog[i])
-        // console.log(xd);
         rainData.splice(0, 1);
         // Asc
+        // rainData.sort((a, b) => a.time.localeCompare(b.time));
         rainData.sort((a, b) => a.time.localeCompare(b.time));
-        // console.log(rainData);
         const label = rainData.map(item => item.time.toString());
         // console.log(label);
         const water = rainData.map(item => item.water);
@@ -222,6 +231,9 @@ export class HomeComponent implements OnInit {
         // console.log(this.lineChartData.datasets[0].data);
         // this.chart?.update();
       }
+      // this.label.sort((a, b) => a.time.localeCompare(b.time));
+      // this.water.sort((a, b) => a.time.localeCompare(b.time));
+
       this.lineChartData.labels = [...this.label];
       this.lineChartData.datasets[0].data = [...this.water];
       this.chart?.update();

@@ -15,3 +15,11 @@ export class Temp {
   temp?: string;
   hum?: string;
 }
+
+export class SettingTime {
+  time?: string;
+}
+
+export class SettingWater {
+  water?: string;
+}

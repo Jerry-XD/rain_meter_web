@@ -1,16 +1,100 @@
-<div>
-  <div class="text-temp">
-    <p>อุณหภูมิ : {{this.temp}} °C</p>
-    <p>ความชื้น : {{this.hum}} %</p>
-    <!-- <p>สถานะเครื่อง :
-      <a style="color:lime" *ngIf="this.online == 'Online'">{{this.online}}</a>
-      <a style="color:red" *ngIf="this.online == 'Offline'">{{this.online}}</a>
-    </p> -->
-  </div>
-  <div style="width: 600px; height: 300px; display: flex; justify-content: center;">
-    <canvas baseChart width="400" height="400" [data]="lineChartData" [options]="lineChartOptions"
-      [type]="lineChartType">
-    </canvas>
-  </div>
+<!-- <h1>Angular 13 Material Datepicker Example - ItSolutionStuff.Com</h1>
+   
+<mat-form-field>
+  <input matInput [matDatepicker]="picker" placeholder="Choose a date">
+  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker ></mat-datepicker>
+</mat-form-field> -->
 
+<!-- <mat-form-field>
+  <mat-label>Input & change events</mat-label>
+  <input matInput [matDatepicker]="picker" (dateInput)="addEvent('input', $event)" (dateChange)="addEvent('change', $event)">
+  <mat-hint>MM/DD/YYYY</mat-hint>
+  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field> -->
+
+<!-- <div class="example-events">
+  <div *ngFor="let e of events">{{e}}</div>
+</div> -->
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md">
+      <!-- One of three columns -->
+      <div class="text-temp">
+        <p>อุณหภูมิ : {{this.temp}} °C</p>
+        <p>ความชื้น : {{this.hum}} %</p>
+      </div>
+      <div>
+        <div style="width: 600px; height: 300px; display: flex; justify-content: center;">
+          <canvas baseChart width="400" height="400" [data]="lineChartData" [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md">
+      <!-- One of three columns -->
+      <!-- <p>เลือกวันที่ดูข้อมูล</p> -->
+      <h3>เลือกวันที่ดูข้อมูล</h3>
+      <br>
+      <mat-card class="demo-inline-calendar-card">
+        <mat-calendar [(selected)]="selected" (selectedChange)="addEvent('change', $event)"></mat-calendar>
+      </mat-card>
+      <br>
+      <div>
+        <button class="btn btn-success" (click)="retrieveTutorials()">ดูทั้งหมด</button>
+      </div>
+      <br>
+      <br>
+      <form>
+        <!-- <h4>mat-select</h4> -->
+        <mat-form-field>
+          <mat-label>ตั้งเวลารายงาน</mat-label>
+          <mat-select [(ngModel)]="selectedTimeValue" name="time">
+            <mat-option *ngFor="let time of times" [value]="time.value">{{time.viewValue}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        &nbsp;&nbsp;&nbsp;
+        <mat-form-field>
+          <mat-label>ตั้งแจ้งเตือนปริมาณน้ำฝน</mat-label>
+          <mat-select [(ngModel)]="selectedWaterValue" name="water">
+            <mat-option *ngFor="let water of waters" [value]="water.value"> {{water.viewValue}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!-- <p> Selected ตั้งเวลารายงาน: {{selectedTimeValue}} </p>
+        <p> Selected ตั้งแจ้งเตือนปริมาณน้ำฝน: {{selectedWaterValue}} </p> -->
+      </form>
+      <button class="btn btn-primary" (click)="updateSetting()">
+        บันทึก
+      </button>
+
+      <!-- <form>
+        <div class="form-group">
+          <label for="title">ตั้งเวลารายงาน</label>
+          <input type="text" class="form-control" id="title" name="title" />
+        </div>
+        <div class="form-group">
+          <label for="description">ตั้งแจ้งเตือนปริมาณน้ำฝน</label>
+          <input type="text" class="form-control" id="description" name="description" />
+        </div>
+        <button class="btn btn-primary">
+          บันทึก
+        </button>
+      </form> -->
+    </div>
+  </div>
 </div>
+
+<!-- <mat-grid-list cols="2" rowHeight="3:1">
+  <mat-grid-tile></mat-grid-tile>
+  <mat-grid-tile></mat-grid-tile>
+
+  <mat-grid-tile></mat-grid-tile>
+  <mat-grid-tile></mat-grid-tile>
+</mat-grid-list> -->
+
+<!-- <p>Selected date: {{selected}}</p>
+ -->

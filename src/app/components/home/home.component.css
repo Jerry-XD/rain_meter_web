@@ -1,5 +1,9 @@
 .text-temp {
     display: flex;
     justify-content: space-between;
-    padding: 0 300px;
+    padding: 0 100px;
 }
+
+.demo-inline-calendar-card {
+    width: 300px;
+  }
