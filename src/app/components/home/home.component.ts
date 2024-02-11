@@ -66,27 +66,43 @@ export class HomeComponent implements OnInit {
     },
     scales: {
       // We use this empty structure as a placeholder for dynamic theming.
+      y: {
+        beginAtZero: true,
+        // ticks: {
+        //   color: 'green',
+        // },
+      },
+      // y1: {
+      //   position: 'right',
+      //   grid: {
+      //     color: 'rgba(255,0,0,0.3)',
+      //   },
+      //   ticks: {
+      //     color: 'red',
+      //   },
+      //   beginAtZero: true,
+      // },
       x: {
+        beginAtZero: true,
       },
-      'y-axis-0':
-      {
-        position: 'left',
-        display: true,
-        ticks: {
-          color: 'blue',
-
-        }
-      },
-      'y-axis-1': {
-        position: 'right',
-        display: false,
-        grid: {
-          color: 'rgba(255,0,0,0.3)',
-        },
-        ticks: {
-          color: 'red'
-        }
-      }
+      // 'y-axis-0':
+      // {
+      //   position: 'left',
+      //   display: true,
+      //   ticks: {
+      //     color: 'blue',
+      //   }
+      // },
+      // 'y-axis-1': {
+      //   position: 'right',
+      //   display: false,
+      //   grid: {
+      //     color: 'rgba(255,0,0,0.3)',
+      //   },
+      //   ticks: {
+      //     color: 'red'
+      //   }
+      // }
     },
 
     plugins: {
@@ -106,6 +122,8 @@ export class HomeComponent implements OnInit {
 
   events: string[] = [];
   selected: Date | null;
+  selectedStart: any;
+  selectedEnd: any;
 
   updateSetting(): void {
     this.tutorialService.updateSettingTime(this.selectedTimeValue)
@@ -124,6 +142,78 @@ export class HomeComponent implements OnInit {
     this.retrieveRainLogWithDate(moment(this.selected).format('DD-MM-YYYY'));
   }
 
+  addStartRangeEvent(type: string, event: any) {
+    // if (event.value) {
+    //   console.log(event.value);
+    // }
+    this.selectedStart = event.value;
+    // console.log("selectedStart", this.selectedStart)
+  }
+
+  addEndRangeEvent(type: string, event: any) {
+    // if (event.value) {
+    //   console.log(event.value);
+    // }
+    this.selectedEnd = event.value;
+    // console.log("selectedEnd", this.selectedEnd)
+    // console.log(this.getDatesBetween(this.selectedStart, this.selectedEnd))
+    this.retrieveRainLogWithArrDate(this.getDatesBetween(this.selectedStart, this.selectedEnd))
+  }
+
+  getDatesBetween(start: string, end: string): string[] {
+    const dates = [];
+    const datesString = [];
+    let startDate = new Date(start);
+    let endDate = new Date(end);
+    let currentDate = new Date(startDate);
+    // console.log(startDate, endDate, currentDate)
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      datesString.push(moment(new Date(currentDate)).format('DD-MM-YYYY'))
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    // console.log(datesString)
+    return datesString;
+  }
+
+  retrieveRainLogWithArrDate(date: string[]): void {
+    console.log("date :", date);
+    this.tutorialService.getAllRainLog().snapshotChanges().pipe(
+      map(changes =>
+        changes.map(c =>
+          ({ key: c.payload.key, ...c.payload.val() })
+        )
+      )
+    ).subscribe(data => {
+      // console.log(data);
+      this.rainLog = data;
+      this.label = []
+      this.water = []
+      for (var i = 0; i < this.rainLog.length; i++) {
+        let rainData = Object.values(this.rainLog[i])
+        // console.log(rainData[0], date[j], (rainData[0] += '') == date[j]);
+        for (var j = 0; j < date.length; j++) {
+          if ((rainData[0] += '') == date[j]) {
+            rainData.splice(0, 1);
+            // Asc
+            rainData.sort((a, b) => a.time.localeCompare(b.time));
+            const label = rainData.map(item => item.time.toString());
+            const water = rainData.map(item => item.water);
+            label.forEach(element => {
+              this.label.push(element);
+            });
+            water.forEach(element => {
+              this.water.push(element);
+            });
+          }
+          this.lineChartData.labels = [...this.label];
+          this.lineChartData.datasets[0].data = [...this.water];
+        }
+        this.chart?.update();
+      }
+    });
+  }
+
   retrieveRainLogWithDate(date: string): void {
     console.log("date :", date);
     this.tutorialService.getAllRainLog().snapshotChanges().pipe(
@@ -139,7 +229,7 @@ export class HomeComponent implements OnInit {
       this.water = []
       for (var i = 0; i < this.rainLog.length; i++) {
         let rainData = Object.values(this.rainLog[i])
-        console.log(rainData[0], date, (rainData[0] += '') == date);
+        // console.log(rainData[0], date, (rainData[0] += '') == date);
         if ((rainData[0] += '') == date) {
           rainData.splice(0, 1);
           // Asc

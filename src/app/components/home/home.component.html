@@ -44,6 +44,16 @@
         <mat-calendar [(selected)]="selected" (selectedChange)="addEvent('change', $event)"></mat-calendar>
       </mat-card>
       <br>
+      <mat-form-field>
+        <mat-label>ดูข้อมูลตามช่วงวันที่</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate matInput placeholder="Start date" (dateChange)="addStartRangeEvent('start', $event)" />
+          <input matEndDate matInput placeholder="End date" (dateChange)="addEndRangeEvent('end', $event)" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+      <br>
       <div>
         <button class="btn btn-success" (click)="retrieveTutorials()">ดูทั้งหมด</button>
       </div>
